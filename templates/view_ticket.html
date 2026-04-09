@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Ticket #{{ ticket.ticket_id }}{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --sage-green: #6b705c;
+        --soft-bg: #fdfaf5;
+    }
+
+    body { background-color: var(--soft-bg); }
+
+    .ticket-container {
+        animation: fadeIn 0.5s ease-out;
+        padding-top: 3rem;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+    }
+
+    .ticket-header {
+        background: var(--sage-green);
+        padding: 2rem;
+        color: white;
+    }
+
+    .status-badge {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #999;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .detail-text {
+        color: #2d2d2d;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+
+    .description-area {
+        background: #fcfcfc;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        line-height: 1.6;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container ticket-container">
+    <div class="glass-card mx-auto" style="max-width: 800px;">
+        
+        <div class="ticket-header d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-0">Ticket #{{ ticket.ticket_id }}</h2>
+                <small class="opacity-75">Created on {{ ticket.created_at }}</small>
+            </div>
+            <div class="status-badge px-3 py-2">
+                {{ ticket.status }}
+            </div>
+        </div>
+
+        <div class="p-4 p-md-5">
+            <div class="row g-4 mb-5">
+                <div class="col-6 col-md-4">
+                    <p class="info-label">Tenant Name</p>
+                    <p class="detail-text fs-5">{{ ticket.tenant_name }}</p>
+                </div>
+                <div class="col-6 col-md-4">
+                    <p class="info-label">Location / Flat</p>
+                    <p class="detail-text fs-5">{{ ticket.flat_no }}</p>
+                </div>
+                <div class="col-12 col-md-4">
+                    <p class="info-label">Urgency Level</p>
+                    <p class="detail-text fs-5 {% if ticket.urgency|lower == 'high' %}text-danger{% endif %}">
+                        {{ ticket.urgency }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <p class="info-label">Issue Category</p>
+                <h4 class="fw-bold mb-3" style="color: var(--sage-green);">{{ ticket.issue_type }}</h4>
+                
+                <div class="description-area p-4">
+                    <p class="info-label mb-2">Description</p>
+                    <p class="text-dark mb-0">{{ ticket.description }}</p>
+                </div>
+            </div>
+
+            {% if ticket.photo %}
+            <div class="mb-5">
+                <p class="info-label mb-3">Photo Evidence</p>
+                <img src="{{ url_for('static', filename='uploads/' + ticket.photo) }}" 
+                     class="rounded-4 shadow-sm w-100" 
+                     style="max-height: 450px; object-fit: contain; background: #000;">
+            </div>
+            {% endif %}
+
+            <hr class="my-4 opacity-25">
+
+            <div class="d-flex justify-content-start">
+                <a href="{{ url_for('owner_dash') }}" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
+                    <i class="fa-solid fa-chevron-left me-2"></i> Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

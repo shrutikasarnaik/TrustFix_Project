@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustFix | Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #fdfaf5; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .login-card { 
+            background: #ffffff;
+            border-radius: 24px; 
+            border: none; 
+            box-shadow: 0 20px 40px rgba(141, 123, 104, 0.08); 
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+        .brand-logo {
+            color: #8d7b68;
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            display: block;
+            text-align: center;
+        }
+        .subtitle {
+            color: #a0948d;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        label { 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            color: #8d7b68; 
+            text-transform: uppercase; 
+            margin-bottom: 8px; 
+            display: block; 
+            letter-spacing: 0.5px;
+        }
+        .form-control { 
+            border-radius: 12px; 
+            border: 1.5px solid #f5eee6; 
+            padding: 14px; 
+            font-size: 0.95rem; 
+            transition: all 0.3s ease;
+            background-color: #fffcf8;
+        }
+        .form-control:focus { 
+            border-color: #8d7b68; 
+            box-shadow: 0 0 0 4px rgba(141, 123, 104, 0.1); 
+            background-color: #fff;
+        }
+        .btn-signin { 
+            background-color: #8d7b68; 
+            color: white; 
+            border: none; 
+            border-radius: 14px; 
+            padding: 16px; 
+            font-weight: 700; 
+            transition: 0.3s; 
+            width: 100%; 
+            margin-top: 10px;
+        }
+        .btn-signin:hover { 
+            background-color: #6f5f50; 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 15px rgba(141, 123, 104, 0.2);
+            color: white;
+        }
+        .footer-links {
+            text-align: center;
+            margin-top: 24px;
+        }
+        .footer-links a {
+            color: #8d7b68;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .footer-links a:hover {
+            color: #4a4036;
+        }
+        /* Alert Styling */
+        .alert {
+            border-radius: 12px;
+            font-size: 0.85rem;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <span class="brand-logo">TrustFix</span>
+    <p class="subtitle">Welcome back. Please login to your account.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }} mb-4">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <div class="mb-3">
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+        </div>
+        
+        <div class="mb-4">
+            <label>Password</label>
+            <div class="input-group">
+                <input type="password" name="password" id="password" class="form-control" 
+                    style="border-right: none;" placeholder="••••••••" required>
+                <span class="input-group-text" id="toggleEye" onclick="togglePassword()" 
+                    style="background: #fffcf8; cursor: pointer; border-left: none; border-color: #f5eee6;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#8d7b68" class="bi bi-eye" viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                    </svg>
+                </span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-signin">Sign In</button>
+    </form>
+
+    <div class="footer-links">
+        <div>
+            <a href="{{ url_for('register_owner') }}">Create Owner Account</a>
+        </div>
+        <div class="mt-2">
+            <a href="{{ url_for('landing') }}">← Back to Home</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | TrustFix{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --trust-sage: #6B705C;
+        --trust-nude: #F3F4ED;
+        --trust-white: #FFFFFF;
+        --glass: rgba(255, 255, 255, 0.85);
+    }
+
+    body { background-color: var(--trust-nude); font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .top-nav-glass {
+        background: var(--glass);
+        backdrop-filter: blur(12px);
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.6);
+        padding: 1.5rem;
+    }
+
+    .welcome-text {
+        background: linear-gradient(90deg, #6B705C, #A5A58D);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        font-size: 2.2rem;
+    }
+
+    .ticket-card {
+        background: var(--trust-white);
+        border-radius: 28px;
+        padding: 30px;
+        border: 1px solid rgba(0,0,0,0.02);
+        transition: all 0.4s ease;
+        margin-bottom: 24px;
+    }
+
+    .ticket-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(107, 112, 92, 0.1);
+    }
+
+    .status-pill {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 8px 20px;
+        border-radius: 50px;
+        text-transform: uppercase;
+    }
+
+    .bg-resolved { background: #E8F5E9; color: #2E7D32; }
+    .bg-pending { background: #FFF3E0; color: #EF6C00; }
+    .bg-progress { background: #E3F2FD; color: #1565C0; }
+
+    .fab-add {
+        position: fixed;
+        bottom: 40px;
+        right: 40px;
+        background: var(--trust-sage);
+        color: white;
+        width: 65px;
+        height: 65px;
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        box-shadow: 0 15px 35px rgba(107, 112, 92, 0.4);
+        text-decoration: none;
+        z-index: 1000;
+    }
+
+    /* Notification Styling */
+    .notif-badge { font-size: 0.6rem; padding: 4px 6px; }
+    .dropdown-menu-notif { 
+        width: 300px; 
+        border-radius: 20px; 
+        border: none; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 15px;
+    }
+</style>
+
+<div class="container py-5">
+    
+    <div class="top-nav-glass mb-5 d-flex justify-content-between align-items-center shadow-sm">
+        <div class="d-flex align-items-center gap-3" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#profileModal">
+            <img src="https://ui-avatars.com/api/?name={{ user.name }}&background=6b705c&color=fff" class="rounded-circle border border-3 border-white shadow-sm" width="60">
+            <div>
+                <h1 class="welcome-text mb-0">Welcome, {{ user.name }}</h1>
+                <p class="text-muted small mb-0 fw-bold"><i class="fa-solid fa-location-dot me-1"></i> {{ user.flat_no or 'Flat' }} | {{ user.area or 'TrustFix' }}</p>
+            </div>
+        </div>
+
+        <div class="dropdown me-3">
+            <button class="btn btn-link position-relative p-0 text-dark border-0 shadow-none" type="button" data-bs-toggle="dropdown">
+                <i class="fa-solid fa-bell fa-xl" style="color: var(--trust-sage);"></i>
+                {% if unread_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notif-badge">
+                    {{ unread_count }}
+                </span>
+                {% endif %}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-notif">
+                <h6 class="fw-bold mb-3 px-2">Notifications</h6>
+                {% for n in notifications %}
+                <li class="p-2 mb-2 rounded-3 {% if n.is_read == 0 %}bg-light{% endif %}" style="font-size: 0.85rem; border-left: 3px solid var(--trust-sage);">
+                    <div class="fw-bold text-dark">{{ n.title }}</div>
+                    <div class="text-muted">{{ n.message }}</div>
+                </li>
+                {% else %}
+                <li class="text-center text-muted py-3 small">All caught up!</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h4 class="fw-bold mb-4" style="color: #4A4E40;">Active Requests</h4>
+
+            {% for ticket in tickets if ticket.status|lower != 'completed' %}
+            <div class="ticket-card d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="p-3 rounded-4 d-flex align-items-center justify-content-center" style="background: #F9F9F7; width: 70px; height: 70px; color: var(--trust-sage);">
+                        <i class="fa-solid fa-2x {% if 'Plumb' in ticket.issue_type %}fa-faucet{% elif 'Elect' in ticket.issue_type %}fa-bolt-lightning{% else %}fa-screwdriver-wrench{% endif %}"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-light text-muted border px-2 py-1 mb-1" style="font-size: 10px;">#{{ ticket.ticket_id }}</span>
+                        <h5 class="fw-bold m-0">{{ ticket.issue_type }}</h5>
+                        <p class="text-muted small mb-0">{{ ticket.description[:80] }}...</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <span class="status-pill {% if ticket.status|lower == 'resolved' %}bg-resolved{% elif ticket.status|lower == 'pending' %}bg-pending{% else %}bg-progress{% endif %}">
+                        ● {{ ticket.status }}
+                    </span>
+
+                    <div class="d-flex gap-2">
+                        {% if ticket.status|lower == 'resolved' %}
+                            <button class="btn btn-warning btn-sm rounded-pill px-4 py-2 fw-bold text-white" 
+                                    data-bs-toggle="modal" data-bs-target="#feedbackModal{{ ticket.id }}">
+                                GIVE FEEDBACK
+                            </button>
+                        {% else %}
+                            <a href="{{ url_for('tenant_view_ticket', ticket_id=ticket.id) }}" class="btn btn-dark btn-sm rounded-pill px-4 py-2 fw-bold" style="background: var(--trust-sage); border: none;">
+                                VIEW
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="feedbackModal{{ ticket.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+                        <div class="modal-header border-0 pb-0 justify-content-center">
+                            <h5 class="fw-bold mt-3">Rate Service #{{ ticket.ticket_id }}</h5>
+                        </div>
+                        <form action="{{ url_for('submit_feedback') }}" method="POST">
+                            <div class="modal-body p-4 text-center">
+                                <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                                <select name="rating" class="form-select mb-3 fw-bold" required>
+                                    <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                                    <option value="4">⭐⭐⭐⭐ Very Good</option>
+                                    <option value="3">⭐⭐⭐ Average</option>
+                                    <option value="2">⭐⭐ Poor</option>
+                                    <option value="1">⭐ Bad</option>
+                                </select>
+                                <textarea name="feedback_text" class="form-control" rows="3" placeholder="Tell us more about the service..."></textarea>
+                            </div>
+                            <div class="modal-footer border-0 pb-4 justify-content-center">
+                                <button type="submit" class="btn btn-dark px-5 py-2 fw-bold shadow" style="background: var(--trust-sage); border-radius: 12px;">SUBMIT & CLOSE</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5 bg-white rounded-5 shadow-sm">
+                <i class="fa-solid fa-circle-check fa-3x text-muted opacity-25 mb-3"></i>
+                <h5 class="text-muted">No active complaints.</h5>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="profileModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold mt-3 px-3">Your Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <img src="https://ui-avatars.com/api/?name={{ user.name }}&background=6b705c&color=fff" class="rounded-circle mb-3" width="80">
+                <h4 class="fw-bold">{{ user.name }}</h4>
+                <p class="text-muted">{{ user.email }}</p>
+                <div class="text-start bg-light p-3 rounded-4 mt-3">
+                    <p class="mb-1"><strong>Flat Number:</strong> {{ user.flat_no }}</p>
+                    <p class="mb-0"><strong>Location:</strong> {{ user.area }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="{{ url_for('raise_ticket') }}" class="fab-add"><i class="fa-solid fa-plus"></i></a>
+{% endblock %}

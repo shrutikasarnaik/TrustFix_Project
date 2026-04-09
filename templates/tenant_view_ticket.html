@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="glass-card p-5 mx-auto shadow-sm" style="max-width: 700px; border-radius: 25px; background: #ffffff; border: 1px solid #eee;">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0" style="color: #6b705c;">Ticket #{{ ticket.ticket_id }}</h3>
+            <span class="badge {% if ticket.status|lower == 'completed' %}bg-success{% else %}bg-warning text-dark{% endif %} px-3 py-2" style="border-radius: 10px;">
+                {{ ticket.status }}
+            </span>
+        </div>
+
+        <hr class="mb-4 text-muted opacity-25">
+
+        <div class="row g-4">
+            <div class="col-12">
+                <p class="small text-muted mb-1 text-uppercase fw-bold">Issue Category</p>
+                <p class="fs-5 fw-bold text-dark">{{ ticket.issue_type }}</p>
+            </div>
+
+            <div class="col-12">
+                <p class="small text-muted mb-1 text-uppercase fw-bold">Description</p>
+                <div class="p-3 rounded-3" style="background: #fdfaf5; border-left: 4px solid #6b705c;">
+                    <p class="mb-0 text-secondary">{{ ticket.description }}</p>
+                </div>
+            </div>
+
+            
+            
+            {# CASE 1: Work is finished by Technician, but Tenant hasn't rated it yet #}
+            {% if ticket.status|lower == 'resolved' %}
+            <div class="col-12 mt-5 p-4 rounded-4" style="background: #f8f9fa; border: 2px dashed #6b705c;">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-star text-warning me-2"></i>Rate the Service</h5>
+                <form action="{{ url_for('submit_feedback') }}" method="POST">
+                    <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Rating (1-5 Stars)</label>
+                        <select name="rating" class="form-select rounded-pill" required>
+                            <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                            <option value="4">⭐⭐⭐⭐ (Good)</option>
+                            <option value="3" selected>⭐⭐⭐ (Average)</option>
+                            <option value="2">⭐⭐ (Poor)</option>
+                            <option value="1">⭐ (Very Bad)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Comments</label>
+                        <textarea name="feedback_text" class="form-control rounded-3" rows="3" placeholder="How was the experience?"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-bold" style="background: #6b705c; border:none;">
+                        Submit & Close Ticket
+                    </button>
+                </form>
+            </div>
+
+            {# CASE 2: Feedback was ALREADY submitted #}
+            {% elif ticket.status|lower == 'completed' %}
+            <div class="col-12 mt-4 text-center">
+                <div class="alert alert-success rounded-4 border-0 shadow-sm" style="background: #f0f4f0;">
+                    <i class="fa-solid fa-check-circle me-2 text-success"></i> 
+                    <strong>Thank you for your feedback!</strong>
+                    <div class="my-2" style="color: #FFB400; font-size: 1.2rem;">
+                        {% for i in range(ticket.rating|int) %}<i class="fa-solid fa-star"></i>{% endfor %}
+                    </div>
+                    <p class="mb-0 mt-1 small italic text-muted">"{{ ticket.feedback or 'No comment provided' }}"</p>
+                </div>
+            </div>
+
+            {# CASE 3: Work is still in progress (Pending) #}
+            {% else %}
+            <div class="col-12 mt-4 text-center">
+                <div class="p-3 bg-light rounded-4 text-muted border">
+                    <i class="fa-solid fa-lock me-2"></i> Feedback unlocks once marked as <strong>Resolved</strong>.
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="col-12 mt-4">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary w-100 py-3 rounded-pill border-0">
+                    <i class="fa-solid fa-arrow-left me-2"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

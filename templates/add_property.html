@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Property Portfolio{% endblock %}
+
+{% block content %}
+<style>
+    .mini-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #8d7b68; font-weight: 700; margin-bottom: 10px; display: block; }
+    .form-control-custom { font-size: 0.9rem; border-radius: 10px; border: 1px solid #eaddcf; padding: 10px 15px; background: #fff; }
+    .card-mini { border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(141, 123, 104, 0.05); background: #fff; }
+    .btn-add { background: #f5eee6; color: #8d7b68; border: 1px dashed #8d7b68; border-radius: 10px; padding: 8px 15px; font-size: 0.85rem; transition: 0.3s; }
+    .btn-add:hover { background: #8d7b68; color: #fff; }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-mini p-4 p-md-5">
+                <h4 class="fw-bold mb-4" style="color: #4a4036;">Register Property Portfolio</h4>
+                
+                <form action="{{ url_for('add_property') }}" method="POST">
+                    <div class="mb-5">
+                        <span class="mini-label text-muted">01. Society & Location</span>
+                        <input type="text" name="society_name" class="form-control-custom mb-3 w-100" placeholder="Society / Apartment Name" required>
+                        <div class="row g-3">
+                            <div class="col-md-4"><input type="text" name="city" class="form-control-custom w-100" placeholder="City" required></div>
+                            <div class="col-md-4"><input type="text" name="state" class="form-control-custom w-100" placeholder="State" required></div>
+                            <div class="col-md-4"><input type="text" name="country" class="form-control-custom w-100" placeholder="Country" required></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <span class="mini-label text-muted">02. Buildings / Towers Owned</span>
+                        <div id="tower-list">
+                            <div class="d-flex gap-2 mb-2">
+                                <input type="text" name="towers[]" class="form-control-custom flex-grow-1" placeholder="Tower Name (e.g. Tower A)" required>
+                                <button type="button" class="btn-add" onclick="addTower()">+</button>
+                            </div>
+                        </div>
+                        <p class="text-muted mt-2" style="font-size: 0.75rem;">Click + to add more wings or towers in this location.</p>
+                    </div>
+
+                    <button type="submit" class="btn w-100 py-3 fw-bold" style="background: #8d7b68; color: white; border-radius: 12px; border: none;">Save to Portfolio</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addTower() {
+        const list = document.getElementById('tower-list');
+        const div = document.createElement('div');
+        div.className = 'd-flex gap-2 mb-2 animate__animated animate__fadeIn';
+        div.innerHTML = `
+            <input type="text" name="towers[]" class="form-control-custom flex-grow-1" placeholder="Next Tower" required>
+            <button type="button" class="btn btn-sm btn-outline-danger" style="border-radius:10px" onclick="this.parentElement.remove()">×</button>
+        `;
+        list.appendChild(div);
+    }
+</script>
+{% endblock %}

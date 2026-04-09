@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}User Directory | TrustFix{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0" style="color: #6b705c;">User Directory</h3>
+            <p class="text-muted small">Manage your tenants and service staff</p>
+        </div>
+        <a href="{{ url_for('create_user') }}" class="btn text-white shadow-sm" style="background:#6b705c; border:none; border-radius: 8px; padding: 10px 20px;">
+            <i class="fa-solid fa-user-plus me-2"></i>Add New
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background-color: #fdfcf0;">
+        <div class="card-body p-3">
+            <form action="{{ url_for('manage_users') }}" method="GET" class="row g-2">
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-start-0 shadow-none" 
+                               style="border-radius: 0 8px 8px 0;"
+                               placeholder="Search by name, area, or flat number..." 
+                               value="{{ search_query or '' }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn text-white w-100 fw-bold" style="background:#6b705c; border:none; border-radius: 8px;">
+                        SEARCH DIRECTORY
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <ul class="nav nav-pills mb-4" id="userTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active px-4" id="tenants-tab" data-bs-toggle="pill" data-bs-target="#tenants" type="button">
+                Tenants
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link px-4" id="techs-tab" data-bs-toggle="pill" data-bs-target="#techs" type="button">
+                Technicians
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+        
+        <div class="tab-pane fade show active" id="tenants">
+            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 15px;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background: #fdfcf0;">
+                        <tr class="small text-muted">
+                            <th class="ps-4" style="width: 80px;">PROFILE</th>
+                            <th>TENANT NAME</th>
+                            <th>LOCATION / AREA</th>
+                            <th>CONTACT</th>
+                            <th class="text-end pe-4">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in tenants %}
+                        <tr>
+                            <td class="ps-4">
+                                <a href="{{ url_for('view_user_profile', user_id=t['id']) }}" class="text-decoration-none">
+                                    <div class="profile-icon-circle rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 42px; height: 42px; transition: all 0.3s ease;">
+                                        <i class="fa-solid fa-user-tie text-muted"></i>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="fw-bold d-block text-dark">{{ t['name'] }}</span>
+                                    <small class="text-muted">ID: #{{ t['id'] }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-dark fw-medium">{{ t['area'] or 'Not Assigned' }}</span><br>
+                                <small class="text-muted">{{ t['address'] or 'No Address' }}</small>
+                            </td>
+                            <td>
+                                <span class="small d-block text-dark"><i class="fa-solid fa-envelope me-1 text-muted"></i>{{ t['email'] }}</span>
+                                <span class="small d-block text-dark"><i class="fa-solid fa-phone me-1 text-muted"></i>{{ t['phone'] or 'N/A' }}</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{{ url_for('view_user_profile', user_id=t['id']) }}" class="btn btn-sm btn-outline-dark px-3" style="border-radius: 6px;">
+                                    View Profile
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-folder-open fa-2x mb-2 d-block"></i>
+                                No tenants found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="techs">
+            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 15px;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background: #fdfcf0;">
+                        <tr class="small text-muted">
+                            <th class="ps-4" style="width: 80px;">PROFILE</th>
+                            <th>TECHNICIAN</th>
+                            <th>SPECIALTY</th>
+                            <th>ASSIGNED AREA</th>
+                            <th class="text-end pe-4">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tech in technicians %}
+                        <tr>
+                            <td class="ps-4">
+                                <a href="{{ url_for('view_user_profile', user_id=tech['id']) }}" class="text-decoration-none">
+                                    <div class="profile-icon-circle rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 42px; height: 42px; transition: all 0.3s ease;">
+                                        <i class="fa-solid fa-screwdriver-wrench text-muted"></i>
+                                    </div>
+                                </a>
+                            </td>
+                            <td><span class="fw-bold text-dark">{{ tech['name'] }}</span></td>
+                            <td><span class="badge bg-success-subtle text-success border border-success px-3" style="font-weight: 500;">{{ tech['specialty'] or 'General' }}</span></td>
+                            <td><span class="text-dark">{{ tech['area'] or 'All Areas' }}</span></td>
+                            <td class="text-end pe-4">
+                                <a href="{{ url_for('view_user_profile', user_id=tech['id']) }}" class="btn btn-sm btn-outline-dark px-3" style="border-radius: 6px;">
+                                    View Profile
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-screwdriver-wrench fa-2x mb-2 d-block"></i>
+                                No technicians found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Tabs */
+    .nav-pills .nav-link.active {
+        background-color: #6b705c !important;
+        color: white !important;
+        box-shadow: 0 4px 10px rgba(107, 112, 92, 0.2);
+    }
+    .nav-pills .nav-link {
+        color: #6b705c;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: #eeeeee;
+    }
+
+    /* Table */
+    .table thead th {
+        border-top: none;
+        letter-spacing: 0.8px;
+        font-weight: 600;
+    }
+    
+    /* Interactive Profile Circle */
+    tr:hover .profile-icon-circle {
+        border-color: #6b705c !important;
+        background-color: #fdfcf0 !important;
+        transform: scale(1.1);
+    }
+
+    /* Action Buttons */
+    .btn-outline-dark {
+        border-color: #6b705c;
+        color: #6b705c;
+        font-weight: 500;
+    }
+    .nav-pills .nav-link.active {
+        background-color: #6b705c !important; /* Your Sage Green */
+        color: #ffffff !important;           /* White Text */
+        box-shadow: 0 4px 12px rgba(107, 112, 92, 0.25);
+        border: 1px solid #6b705c;
+    }
+
+    /* 2. THE INACTIVE BUTTON (The "other" button) */
+    .nav-pills .nav-link {
+        background-color: #fdfcf0 !important; /* Soft Beige/Nude background */
+        color: #6b705c !important;           /* Sage Green Text */
+        border: 1px solid #e9e7da;           /* Subtle border so it's visible */
+        margin-right: 8px;
+        transition: all 0.3s ease;
+    }
+
+    /* 3. HOVER EFFECT (When you put your mouse over the inactive button) */
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: #f5f3e5 !important; /* Slightly darker beige */
+        border-color: #6b705c;
+        transform: translateY(-1px);
+    }
+
+    /* Optional: Style for the Search Button specifically */
+    .btn-search-custom {
+        background-color: #6b705c !important;
+        color: white !important;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+    .btn-outline-dark:hover {
+        background-color: #6b705c;
+        border-color: #6b705c;
+        color: white;
+    }
+</style>
+{% endblock %}

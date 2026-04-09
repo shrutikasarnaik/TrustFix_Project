@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --trust-sage: #6B705C;
+        --trust-tan: #8d7b68;
+    }
+    .role-toggle { background: #f5eee6; border-radius: 12px; padding: 5px; display: inline-flex; margin-bottom: 30px; }
+    .role-btn { padding: 8px 24px; border-radius: 10px; cursor: pointer; border: none; background: transparent; color: #8d7b68; font-weight: 600; font-size: 0.85rem; transition: 0.3s; }
+    .role-btn.active { background: var(--trust-tan); color: white; }
+    .mini-label { font-size: 0.75rem; text-transform: uppercase; color: #a0948d; font-weight: 700; margin-bottom: 5px; display: block; }
+    .form-box { border-radius: 12px; border: 1px solid #eaddcf; padding: 12px; font-size: 0.9rem; width: 100%; outline: none; }
+    .form-box:focus { border-color: var(--trust-sage); box-shadow: 0 0 0 3px rgba(107, 112, 92, 0.1); }
+    .readonly-box { background-color: #faf9f7 !important; border: 1px dashed #d7ccc8 !important; color: #9e938a !important; }
+    .hidden { display: none; }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}" class="text-decoration-none text-muted">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Add User</li>
+                </ol>
+            </nav>
+
+            <div class="card border-0 shadow-sm p-4 p-md-5" style="border-radius: 24px;">
+                <div class="text-center">
+                    <h4 class="fw-bold" style="color: #4a4036;">Onboard New Member</h4>
+                    <p class="text-muted small">Choose a role to begin account setup</p>
+                    <div class="role-toggle mt-2">
+                        <button type="button" class="role-btn active" id="btn-tenant" onclick="setRole('tenant')">Tenant</button>
+                        <button type="button" class="role-btn" id="btn-tech" onclick="setRole('technician')">Technician</button>
+                    </div>
+                </div>
+
+                <form action="{{ url_for('create_user') }}" method="POST" class="mt-4">
+                    <input type="hidden" name="role" id="input-role" value="tenant">
+
+                    <div class="mb-4">
+                        <span class="mini-label">Property Selection</span>
+                        <select id="apt-selector" name="building_id" class="form-box" onchange="autofill()" required>
+                            <option value="">-- Choose Society/Building --</option>
+                            {% for b in owner_buildings %}
+                            <option value="{{ b.id }}" data-city="{{ b.city }}" data-state="{{ b.state }}">
+                                {{ b.society_name }} ({{ b.house_no }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="autofill-row" class="mb-4">
+                        <span class="mini-label">Property Location</span>
+                        <div class="row g-2">
+                            <div class="col-6"><input type="text" id="auto-city" class="form-box readonly-box" readonly placeholder="City"></div>
+                            <div class="col-6"><input type="text" id="auto-state" class="form-box readonly-box" readonly placeholder="State"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="mini-label">Personal Details</span>
+                        <div class="row g-2">
+                            <div class="col-md-8">
+                                <input type="text" name="full_name" class="form-box" placeholder="Legal Full Name" required>
+                            </div>
+                            <div class="col-md-4" id="flat-field">
+                                <input type="text" name="flat_no" class="form-box" placeholder="Flat No.">
+                            </div>
+                            <div class="col-md-4 hidden" id="special-field">
+                                <select name="specialization" class="form-box">
+                                    <option value="">Expertise...</option>
+                                    <option value="Plumber">Plumber</option>
+                                    <option value="Electrician">Electrician</option>
+                                    <option value="Carpenter">Carpenter</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="mini-label">Account Credentials</span>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input type="text" name="username" class="form-box" placeholder="Create Username" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="password" name="password" class="form-box" placeholder="Password" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn w-100 py-3 mt-3 fw-bold shadow-sm" style="background: var(--trust-tan); color: white; border-radius: 14px; border: none;">
+                        Generate Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setRole(role) {
+        document.getElementById('input-role').value = role;
+        document.getElementById('btn-tenant').classList.toggle('active', role === 'tenant');
+        document.getElementById('btn-tech').classList.toggle('active', role === 'technician');
+        
+        // Toggle visibility based on role
+        document.getElementById('flat-field').classList.toggle('hidden', role !== 'tenant');
+        document.getElementById('special-field').classList.toggle('hidden', role !== 'technician');
+    }
+
+    function autofill() {
+        const s = document.getElementById('apt-selector');
+        const opt = s.options[s.selectedIndex];
+        document.getElementById('auto-city').value = opt.dataset.city || '';
+        document.getElementById('auto-state').value = opt.dataset.state || '';
+    }
+</script>
+{% endblock %}

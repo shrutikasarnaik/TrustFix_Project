@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg overflow-hidden" style="border-radius: 25px;">
+                
+                {% set role = user.role|lower %}
+                <div class="p-4 text-white d-flex align-items-center justify-content-between" 
+                     style="background: {% if role == 'tenant' %}#6b705c{% elif role == 'technician' %}#4a4e69{% else %}#212529{% endif %};">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px; overflow: hidden;">
+                            {% if user.profile_pic %}
+                                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" class="w-100 h-100" style="object-fit: cover;">
+                            {% else %}
+                                <i class="fa-solid {% if role == 'tenant' %}fa-house-user{% elif role == 'technician' %}fa-wrench{% else %}fa-user-shield{% endif %} fa-2x text-dark"></i>
+                            {% endif %}
+                        </div>
+                        <div class="ms-4">
+                            <h3 class="mb-0 fw-bold">{{ user.name }}</h3>
+                            <span class="badge bg-light text-dark text-uppercase">{{ user.role }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-5 bg-white">
+                    <form action="{{ url_for('my_profile') }}" method="POST" enctype="multipart/form-data">
+                        <div class="row g-4">
+                            <div class="col-md-6 border-end">
+                                <h6 class="text-uppercase text-muted fw-bold mb-4 small border-bottom pb-2">Profile Information</h6>
+                                <div class="mb-3">
+                                    <label class="small text-muted d-block">Full Name</label>
+                                    <input type="text" class="form-control fw-bold" value="{{ user.name }}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="small text-muted d-block">Official Email</label>
+                                    <input type="email" name="email" class="form-control" value="{{ user.email }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="small text-muted d-block">Phone Number</label>
+                                    <input type="text" name="phone" class="form-control" value="{{ user.phone or '' }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="small text-muted d-block">Change Profile Picture</label>
+                                    <input type="file" name="profile_pic" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h6 class="text-uppercase text-muted fw-bold mb-4 small border-bottom pb-2">Account-Specific Details</h6>
+                                
+                                {% if role == 'tenant' %}
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">Area</label>
+                                        <input type="text" name="area" class="form-control" value="{{ user.area or '' }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">Flat No.</label>
+                                        <input type="text" name="flat_no" class="form-control" value="{{ user.flat_no or '' }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">Occupation</label>
+                                        <input type="text" name="occupation" class="form-control" value="{{ user.occupation or '' }}">
+                                    </div>
+                                {% elif role == 'technician' %}
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">Primary Specialty</label>
+                                        <input type="text" name="work_type" class="form-control" value="{{ user.work_type or user.specialty or '' }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">Service Rate</label>
+                                        <input type="number" name="service_rate" class="form-control" value="{{ user.service_rate or '0' }}">
+                                    </div>
+                                {% else %}
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">System Permissions</label>
+                                        <p class="text-primary fw-bold">Full Administrative Control</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="small text-muted d-block">Account Status</label>
+                                        <p><span class="badge bg-success">Active</span></p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mt-5 text-center">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary px-5 me-2">Cancel</a>
+                            <button type="submit" class="btn btn-dark px-5" style="background:#6b705c; border:none;">Update Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

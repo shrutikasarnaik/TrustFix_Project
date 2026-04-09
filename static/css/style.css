@@ -1,0 +1,161 @@
+:root {
+    --bg-fresh: #F8F9F8;
+    --primary-dark: #1B2621;     
+    --accent-champagne: #D9C5B2; 
+    --sage-active: #6B705C;     
+    --text-main: #2D3436;
+    --white: #FFFFFF;
+}
+
+body { 
+    background-color: var(--bg-fresh); 
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin: 0;
+    display: flex;
+}
+
+/* --- SIDEBAR UI --- */
+.sidebar {
+    width: 280px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--primary-dark);
+    padding: 35px 20px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1100;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+}
+
+.brand-logo {
+    color: var(--white);
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.brand-logo i { color: var(--accent-champagne); }
+
+.nav-group-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin: 20px 0 10px 15px;
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    color: rgba(255,255,255,0.7) !important;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 5px;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: 0.3s ease;
+}
+
+.nav-link i { width: 30px; font-size: 1.1rem; }
+
+.nav-link:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--white) !important;
+    transform: translateX(5px);
+}
+
+.nav-link.active {
+    background: var(--sage-active) !important;
+    color: var(--white) !important;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* --- CONTENT AREA --- */
+.main-content {
+    flex-grow: 1;
+    margin-left: 280px;
+    padding: 40px;
+    min-height: 100vh;
+    width: calc(100% - 280px);
+}
+
+/* --- THE "LANDING PAGE" HIDER --- */
+/* If body has no-sidebar class, hide menu and stretch content */
+body.no-sidebar .sidebar {
+    display: none !important;
+}
+
+body.no-sidebar .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+}
+
+/* Landing Page Specific UI (Maintenance Perfected) */
+.btn-dark-stylish {
+    background-color: var(--primary-dark);
+    color: var(--white);
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.btn-dark-stylish:hover {
+    background-color: var(--sage-active);
+    transform: translateY(-3px);
+    color: var(--white);
+}
+
+/* --- MODERN GLASSMORPHISM UI --- */
+
+/* The Glass Box effect */
+.glass-box {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+/* Stylish Logo */
+.brand-logo-modern {
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    font-size: 2.2rem;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+}
+
+.brand-logo-modern i {
+    color: var(--accent-champagne);
+    font-size: 1.8rem;
+    margin-right: 12px;
+}
+
+/* Glass FAQ Cards */
+.faq-card-modern {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    margin-bottom: 15px;
+    transition: 0.3s;
+}
+
+.faq-card-modern:hover {
+    background: rgba(255, 255, 255, 0.9);
+}

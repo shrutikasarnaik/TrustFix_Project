@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Service History | TrustFix{% endblock %}
+
+{% block content %}
+<style>
+    :root { --sage: #6b705c; --nude: #fdfcf0; }
+    body { background-color: #fdfaf5; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .history-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 24px;
+        border: 1px solid rgba(107, 112, 92, 0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+    }
+
+    .comparison-box {
+        border-radius: 20px;
+        overflow: hidden;
+        background: #f8f9fa;
+        border: 1px solid #eee;
+    }
+
+    .evidence-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .feedback-quote {
+        background: white;
+        border-left: 4px solid var(--sage);
+        padding: 15px;
+        border-radius: 0 15px 15px 0;
+        font-style: italic;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h2 class="fw-bold">Service <span style="color: var(--sage);">History</span></h2>
+            <p class="text-muted">Review your past requests and track resolutions.</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <input type="text" id="historySearch" class="form-control rounded-pill px-4 border-0 shadow-sm" placeholder="Search by issue or technician...">
+        </div>
+    </div>
+
+    {% if history %}
+    <div class="history-card mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="small text-muted">
+                        <th class="ps-4">ID</th>
+                        <th>ISSUE</th>
+                        <th>TECHNICIAN</th>
+                        <th>STATUS</th>
+                        <th class="text-center">REPORT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in history %}
+                    <tr class="task-item">
+                        <td class="ps-4 fw-bold">#{{ task.id }}</td>
+                        <td class="search-target">
+                            <div class="fw-bold">{{ task.issue_type }}</div>
+                            <div class="small text-muted">{{ task.created_at[:10] }}</div>
+                        </td>
+                        <td class="search-target">
+                            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill small">
+                                <i class="fa-solid fa-wrench me-1 text-muted"></i> {{ task.tech_name or 'Assigning...' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if task.status == 'Pending' %}
+                                <span class="badge bg-warning-subtle text-warning rounded-pill px-3">Pending</span>
+                            {% else %}
+                                <span class="badge bg-success-subtle text-success rounded-pill px-3">Resolved</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-dark btn-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modal{{ task.id }}">View Details</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-3"><i class="fa-solid fa-folder-open fa-3x text-muted opacity-50"></i></div>
+        <h5 class="text-muted">No history found yet.</h5>
+    </div>
+    {% endif %}
+</div>
+
+{% for task in history %}
+<div class="modal fade" id="modal{{ task.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 30px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold">Job Performance Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                
+                <div class="d-flex justify-content-between align-items-center p-3 rounded-4 mb-4" style="background: var(--nude); border: 1px solid rgba(107, 112, 92, 0.2);">
+                    <div>
+                        <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.6rem;">TECHNICIAN</small>
+                        <span class="fw-bold">{{ task.tech_name or 'Not yet assigned' }}</span>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.6rem;">TICKET STATUS</small>
+                        <span class="badge bg-dark text-white rounded-pill px-3">{{ task.status }}</span>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <span class="badge bg-danger-subtle text-danger mb-2 px-3 rounded-pill">YOUR REQUEST PHOTO</span>
+                        <div class="comparison-box">
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + task.photo) if task.photo else '' }}" 
+                                 class="evidence-img" 
+                                 onerror="this.src='https://placehold.co/400x300?text=No+Photo+Uploaded'">
+                            <div class="p-3 small text-muted"><strong>Your Note:</strong> {{ task.description }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="badge bg-success-subtle text-success mb-2 px-3 rounded-pill">RESOLUTION PROOF</span>
+                        <div class="comparison-box" style="border: 1px solid var(--sage);">
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + task.completion_photo) if task.completion_photo else '' }}" 
+                                 class="evidence-img" 
+                                 onerror="this.src='https://placehold.co/400x300?text=Work+In+Progress'">
+                            <div class="p-3 small text-muted"><strong>Tech Note:</strong> {{ task.completion_notes or 'Pending resolution.' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-dark w-100 mt-4 py-3 rounded-4 fw-bold" data-bs-dismiss="modal">Close Archives</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+    // Live Filtering Script
+    document.getElementById('historySearch').addEventListener('input', function(e) {
+        let term = e.target.value.toLowerCase();
+        let rows = document.querySelectorAll('.task-item');
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(term) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

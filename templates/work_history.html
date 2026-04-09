@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Work History | TrustFix{% endblock %}
+
+{% block content %}
+<style>
+    :root { --sage: #6b705c; --nude: #fdfcf0; }
+    body { background-color: #fdfaf5; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .history-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 24px;
+        border: 1px solid rgba(107, 112, 92, 0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+    }
+
+    .comparison-box {
+        border-radius: 20px;
+        overflow: hidden;
+        background: #f8f9fa;
+        border: 1px solid #eee;
+    }
+
+    .evidence-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .feedback-quote {
+        background: white;
+        border-left: 4px solid var(--sage);
+        padding: 15px;
+        border-radius: 0 15px 15px 0;
+        font-style: italic;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h2 class="fw-bold">Job <span style="color: var(--sage);">Archives</span></h2>
+            <p class="text-muted">Review your performance and tenant testimonials.</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <input type="text" id="historySearch" class="form-control rounded-pill px-4 border-0 shadow-sm" placeholder="Search by area or tenant name...">
+        </div>
+    </div>
+
+    {% for month, tasks in grouped_tasks.items() %}
+    <h6 class="text-uppercase fw-bold text-muted small mb-3 mt-4" style="letter-spacing: 2px;">{{ month }}</h6>
+    <div class="history-card mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="small text-muted">
+                        <th class="ps-4">ID</th>
+                        <th>TENANT / ISSUE</th>
+                        <th>LOCATION</th>
+                        <th>DATE</th>
+                        <th class="text-center">REPORT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr class="task-item">
+                        <td class="ps-4 fw-bold">#{{ task.id }}</td>
+                        <td class="search-target">
+                            <div class="fw-bold">{{ task.tenant_name }}</div>
+                            <div class="small text-muted">{{ task.issue_type }}</div>
+                        </td>
+                        <td class="search-target">
+                            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill small">
+                                <i class="fa-solid fa-location-dot me-1 text-muted"></i> {{ task.area }}
+                            </span>
+                        </td>
+                        <td class="small text-muted">{{ task.created_at[:10] }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-dark btn-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modal{{ task.id }}">View</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% for month, tasks in grouped_tasks.items() %}
+    {% for task in tasks %}
+    <div class="modal fade" id="modal{{ task.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 30px;">
+                <div class="modal-header border-0 p-4 pb-0">
+                    <h5 class="fw-bold">Job Performance Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded-4 mb-4" style="background: var(--nude); border: 1px solid rgba(107, 112, 92, 0.2);">
+                        <div>
+                            <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.6rem;">UNIT ADDRESS</small>
+                            <span class="fw-bold">{{ task.flat_no }}, {{ task.area }}, {{ task.city }}</span>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.6rem;">TENANT RATING</small>
+                            <div class="text-warning">
+                                {% if task.rating %}
+                                    {% for i in range(task.rating|int) %}<i class="fa-solid fa-star"></i>{% endfor %}
+                                {% else %}
+                                    <span class="text-muted small">No rating</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <span class="badge bg-danger-subtle text-danger mb-2 px-3 rounded-pill">BEFORE (Request)</span>
+                            <div class="comparison-box">
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + task.photo) if task.photo else '' }}" 
+                                     class="evidence-img" 
+                                     onerror="this.src='https://placehold.co/400x300?text=No+Photo+Uploaded'">
+                                <div class="p-3 small text-muted"><strong>Issue:</strong> {{ task.description }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="badge bg-success-subtle text-success mb-2 px-3 rounded-pill">AFTER (Fixed)</span>
+                            <div class="comparison-box" style="border: 1px solid var(--sage);">
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + task.completion_photo) if task.completion_photo else '' }}" 
+                                     class="evidence-img" 
+                                     onerror="this.src='https://placehold.co/400x300?text=No+Proof+Photo'">
+                                <div class="p-3 small text-muted"><strong>Resolution:</strong> {{ task.completion_notes or 'Resolved successfully.' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-3"><i class="fa-solid fa-comment-dots me-2 text-primary"></i>Tenant Feedback</h6>
+                        {% if task.feedback %}
+                            <div class="feedback-quote shadow-sm border">
+                                <p class="mb-0 text-dark">"{{ task.feedback }}"</p>
+                                <small class="text-muted d-block mt-2">— {{ task.tenant_name }}</small>
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted small py-3 border rounded-4 bg-light">No feedback left by tenant yet.</p>
+                        {% endif %}
+                    </div>
+
+                    <button class="btn btn-dark w-100 mt-4 py-3 rounded-4 fw-bold" data-bs-dismiss="modal">Close Archives</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endfor %}
+
+<script>
+    // Live Filtering
+    document.getElementById('historySearch').addEventListener('input', function(e) {
+        let term = e.target.value.toLowerCase();
+        let rows = document.querySelectorAll('.task-item');
+        rows.forEach(row => {
+            let text = row.querySelector('.search-target').innerText.toLowerCase();
+            row.style.display = text.includes(term) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

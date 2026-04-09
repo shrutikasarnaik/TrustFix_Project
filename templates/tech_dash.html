@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Technician Portal | TrustFix{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --sage-green: #6b705c;
+        --nude-beige: #fdfcf0;
+        --glass: rgba(255, 255, 255, 0.85);
+    }
+    body { background-color: #fdfaf5; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .glass-card {
+        background: var(--glass);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 28px;
+        padding: 30px;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(107, 112, 92, 0.05);
+    }
+    .glass-card:hover { transform: translateY(-5px); }
+
+    .avatar {
+        width: 55px; height: 55px;
+        background: var(--sage-green);
+        color: white;
+        border-radius: 18px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-action { border-radius: 15px; font-weight: 700; padding: 12px; transition: 0.3s; border: none; }
+    .btn-accept { background-color: var(--sage-green); color: white; }
+    .btn-reject { background-color: #fff1f1; color: #bc4749; }
+    
+    .status-pill {
+        font-size: 0.65rem;
+        letter-spacing: 1px;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="d-flex align-items-center gap-3" data-bs-toggle="modal" data-bs-target="#profileModal">
+            <div class="avatar">{{ user.name[0]|upper if user else 'T' }}</div>
+            <div>
+                <h3 class="fw-bold mb-0">My Workspace</h3>
+                <p class="text-muted small mb-0">Role: {{ user.work_type if user else 'Technician' }}</p>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-4">
+            <div class="dropdown">
+                <button class="btn btn-link position-relative p-0 text-dark border-0 shadow-none" type="button" data-bs-toggle="dropdown">
+                    <i class="fa-solid fa-bell fa-xl" style="color: var(--sage-green);"></i>
+                    {% if unread_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                        {{ unread_count }}
+                    </span>
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-3" style="width: 280px; border-radius: 20px;">
+                    <h6 class="fw-bold mb-3">Job Alerts</h6>
+                    {% for n in notifications %}
+                    <li class="p-2 mb-2 rounded-3 bg-light" style="font-size: 0.8rem; border-left: 3px solid var(--sage-green);">
+                        <strong>{{ n.title }}</strong><br>{{ n.message }}
+                    </li>
+                    {% else %}
+                    <li class="text-center text-muted small py-2">No new alerts</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="text-end">
+                <span class="text-muted small d-block">ACTIVE JOBS</span>
+                <h2 class="fw-bold mb-0" style="color: var(--sage-green);">{{ tasks|length }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for task in tasks %}
+        <div class="col-lg-6">
+            <div class="glass-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="status-pill {% if task.urgency|lower == 'high' %}bg-danger text-white{% else %}bg-warning text-dark{% endif %} mb-2 d-inline-block">
+                            {{ task.urgency or 'Normal' }} Priority
+                        </span>
+                        <h4 class="fw-bold mb-1">{{ task.issue_type }}</h4>
+                        <p class="text-muted small mb-0"><i class="fa-solid fa-location-dot me-1"></i> {{ task.area }} • {{ task.username }}</p>
+                    </div>
+                    <span class="text-muted fw-bold small">#{{ task.ticket_id }}</span>
+                </div>
+
+                <hr class="opacity-10 my-4">
+
+                <button class="btn btn-light w-100 rounded-4 py-2 mb-4 text-muted fw-bold small border-0" 
+                        data-bs-toggle="modal" data-bs-target="#detail{{ task.id }}">
+                    <i class="fa-solid fa-camera-retro me-2"></i> VIEW ISSUE DISCRIPTION
+                </button>
+
+                <div class="d-flex gap-2">
+                    {% if task.status|lower == 'in progress' %}
+                        <form action="{{ url_for('update_ticket_status') }}" method="POST" enctype="multipart/form-data" class="w-100">
+                            <input type="hidden" name="ticket_id" value="{{ task.id }}">
+                            <input type="hidden" name="status" value="Resolved">
+                            
+                            <div class="p-3 bg-white rounded-4 mb-3 border">
+                                <label class="small fw-bold text-muted mb-2"><i class="fa-solid fa-image me-1"></i> AFTER FIX PHOTO</label>
+                                <input type="file" name="completion_photo" class="form-control form-control-sm border-0 mb-3" required>
+                                
+                                <label class="small fw-bold text-muted mb-2"><i class="fa-solid fa-pen me-1"></i> COMPLETION NOTES</label>
+                                <textarea name="completion_notes" class="form-control form-control-sm border-0 bg-light" 
+                                          placeholder="What did you do to fix this?" rows="2" required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-accept btn-action w-100">
+                                <i class="fa-solid fa-circle-check me-2"></i> FINISH & SUBMIT
+                            </button>
+                        </form>
+                    {% else %}
+                        <button class="btn btn-accept btn-action w-50" onclick="updateStatus('{{ task.id }}', 'In Progress')">
+                            <i class="fa-solid fa-check me-1"></i> ACCEPT
+                        </button>
+                        <button class="btn btn-reject btn-action w-50" data-bs-toggle="modal" data-bs-target="#rejectModal{{ task.id }}">
+                            <i class="fa-solid fa-xmark me-1"></i> DECLINE
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="detail{{ task.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content glass-card border-0 p-0">
+                    <div class="modal-body p-4">
+                        <h5 class="fw-bold mb-3">Issue Evidence</h5>
+                        {% if task.photo %}
+                        <img src="{{ url_for('static', filename='uploads/tickets/' + task.photo) }}" class="img-fluid rounded-4 mb-3 shadow-sm" onerror="this.src='/static/uploads/placeholder.jpg'">
+                        {% else %}
+                        <div class="bg-light rounded-4 text-center py-5 mb-3 text-muted">No photo provided</div>
+                        {% endif %}
+                        <p class="small text-muted mb-0"><strong>Description:</strong> {{ task.description }}</p>
+                        <button class="btn btn-dark w-100 mt-4 rounded-4" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="rejectModal{{ task.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content glass-card border-0 p-0">
+                    <form action="{{ url_for('reject_task') }}" method="POST">
+                        <input type="hidden" name="ticket_id" value="{{ task.id }}">
+                        <div class="modal-body p-4 text-center">
+                            <i class="fa-solid fa-circle-exclamation text-danger fa-3x mb-3"></i>
+                            <h5 class="fw-bold">Decline Job?</h5>
+                            <p class="text-muted small">Please tell the owner why you cannot take this job.</p>
+                            <textarea name="reason" class="form-control rounded-4 border-0 bg-light p-3" rows="3" placeholder="e.g. Too busy, out of tools..." required></textarea>
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="button" class="btn btn-light w-50 rounded-4" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-danger w-50 rounded-4 fw-bold">Decline Job</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="profileModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0 p-0">
+            <div class="modal-body p-4 text-center">
+                <div class="avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">{{ user.name[0]|upper if user else 'T' }}</div>
+                <h4 class="fw-bold">{{ user.name if user else 'Technician' }}</h4>
+                <div class="text-start bg-light p-3 rounded-4 mt-3">
+                    <p class="mb-1 small"><strong>Specialty:</strong> {{ user.work_type }}</p>
+                    <p class="mb-0 small"><strong>ID:</strong> #TECH-{{ user.id }}</p>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger w-100 mt-4 rounded-4">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateStatus(id, status) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('update_ticket_status') }}";
+        
+        const idIn = document.createElement('input');
+        idIn.type = 'hidden'; idIn.name = 'ticket_id'; idIn.value = id;
+        
+        const stIn = document.createElement('input');
+        stIn.type = 'hidden'; stIn.name = 'status'; stIn.value = status;
+        
+        form.appendChild(idIn); form.appendChild(stIn);
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+{% endblock %}

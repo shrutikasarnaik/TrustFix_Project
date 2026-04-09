@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --trustfix-sage: #6B705C;
+        --trustfix-olive: #A5A58D;
+        --trustfix-light: #F8F9FA;
+    }
+    .complaint-card {
+        background: #fff;
+        border: 1px solid rgba(107, 112, 92, 0.1);
+        transition: all 0.3s ease;
+        border-radius: 20px;
+    }
+    .complaint-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.05);
+    }
+
+    /* Workflow Progress Styling */
+    .progress-container {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .step-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 80px;
+        z-index: 1;
+    }
+
+    .workflow-line {
+        position: absolute;
+        top: 18px; 
+        left: 40px;
+        right: 40px;
+        height: 3px;
+        background: #dee2e6;
+        z-index: 0;
+    }
+
+    .workflow-line-active {
+        position: absolute;
+        top: 18px;
+        left: 40px;
+        height: 3px;
+        background: var(--trustfix-sage);
+        z-index: 0;
+        transition: width 0.5s ease;
+    }
+
+    .step-icon {
+        width: 35px;
+        height: 35px;
+        line-height: 35px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #dee2e6;
+        font-size: 14px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .step-active { 
+        border-color: var(--trustfix-sage) !important;
+        color: var(--trustfix-sage) !important;
+        box-shadow: 0 0 10px rgba(107, 112, 92, 0.2);
+    }
+
+    .smaller-text { font-size: 11px; color: #6c757d; font-weight: 600; }
+    .text-active { color: var(--trustfix-sage) !important; font-weight: 700; }
+    
+    /* Clickable area styling */
+    .feedback-trigger {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 10px;
+        border-radius: 15px;
+    }
+    .feedback-trigger:hover {
+        background: #F9F9F7;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('owner_dash') }}" class="btn btn-sm btn-outline-secondary rounded-pill me-3">
+            <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+        <h3 class="fw-bold m-0" style="color: var(--trustfix-sage);">Complaint Lifecycle & Feedback</h3>
+    </div>
+
+    <div class="row">
+        {% for c in complaints %}
+        <div class="col-12 mb-4">
+            <div class="card complaint-card p-4 shadow-sm">
+                <div class="row g-3 align-items-center">
+                    
+                    <div class="col-md-2 text-center border-end">
+                        {% if c.photo %}
+                            <img src="{{ url_for('static', filename='uploads/tickets/' + c.photo) }}" class="rounded-3 shadow-sm w-100" style="height: 110px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light rounded-3 d-flex align-items-center justify-content-center" style="height: 110px;">
+                                <i class="fa-solid fa-wrench text-muted fa-2x"></i>
+                            </div>
+                        {% endif %}
+                        <span class="badge mt-2" style="background: var(--trustfix-olive);">#{{ c.ticket_id }}</span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <h6 class="fw-bold m-0 text-uppercase" style="letter-spacing: 0.5px;">{{ c.issue_type }}</h6>
+                        <p class="small text-muted mb-2"><i class="fa-solid fa-user me-1"></i> {{ c.tenant_name }}</p>
+                        <p class="small mb-0 text-muted" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ c.description }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-4 px-4 border-start">
+                        <p class="smaller-text text-uppercase mb-3 text-center">Lifecycle Stage</p>
+                        <div class="progress-container">
+                            <div class="workflow-line"></div>
+                            
+                            {% set green_width = "0%" %}
+                            {% if c.status|lower == 'pending' %}{% set green_width = "10%" %}
+                            {% elif c.status|lower in ['assigned', 'in progress'] %}{% set green_width = "50%" %}
+                            {% elif c.status|lower in ['resolved', 'completed'] %}{% set green_width = "100%" %}
+                            {% endif %}
+                            
+                            <div class="workflow-line-active" style="width: calc({{ green_width }} - 40px);"></div>
+
+                            <div class="step-container">
+                                <div class="step-icon step-active"><i class="fa-solid fa-file-signature"></i></div>
+                                <span class="smaller-text text-active">Reported</span>
+                            </div>
+                            
+                            <div class="step-container">
+                                <div class="step-icon {{ 'step-active' if c.status|lower != 'pending' else '' }}">
+                                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                                </div>
+                                <span class="smaller-text {{ 'text-active' if c.status|lower != 'pending' else '' }}">Action</span>
+                            </div>
+                            
+                            <div class="step-container">
+                                <div class="step-icon {{ 'step-active' if c.status|lower in ['resolved', 'completed'] else '' }}">
+                                    <i class="fa-solid fa-house-circle-check"></i>
+                                </div>
+                                <span class="smaller-text {{ 'text-active' if c.status|lower in ['resolved', 'completed'] else '' }}">Resolved</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 text-center border-start">
+                        <p class="smaller-text text-uppercase mb-2">Tenant Experience</p>
+                        
+                        {% if c.status|lower in ['resolved', 'completed'] %}
+                            <div class="feedback-trigger" data-bs-toggle="modal" data-bs-target="#feedbackModal{{ c.id }}">
+                                {% if c.rating %}
+                                    <div class="mb-2" style="color: #FFB400; font-size: 14px;">
+                                        {% for i in range(c.rating|int) %}<i class="fa-solid fa-star"></i>{% endfor %}
+                                        {% for i in range(5 - c.rating|int) %}<i class="fa-regular fa-star"></i>{% endfor %}
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill" style="font-size: 10px;">
+                                        Click to view feedback
+                                    </span>
+                                {% else %}
+                                    <div class="py-2 px-3 bg-warning-subtle text-warning rounded-pill border border-warning d-inline-block">
+                                        <small class="fw-bold"><i class="fa-solid fa-clock-rotate-left me-1"></i> Awaiting Rating</small>
+                                    </div>
+                                    <p class="text-muted mt-2 mb-0" style="font-size: 10px;">Tenant hasn't rated yet (Click for info)</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="modal fade" id="feedbackModal{{ c.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+                                        <div class="modal-header border-0 pb-0 justify-content-center">
+                                            <h5 class="fw-bold mt-3">Detailed Feedback</h5>
+                                        </div>
+                                        <div class="modal-body p-4 text-center">
+                                            <div class="mb-3">
+                                                <i class="fa-solid fa-quote-left fa-2x text-muted opacity-25"></i>
+                                            </div>
+                                            
+                                            {% if c.rating %}
+                                                <h4 class="fw-bold mb-2 text-warning">
+                                                    {% for i in range(c.rating|int) %}★{% endfor %}
+                                                </h4>
+                                                <p class="fs-5 text-dark italic px-3">
+                                                    "{{ c.feedback or 'No written comments provided.' }}"
+                                                </p>
+                                                <hr>
+                                                <p class="small text-muted">Submitted by <b>{{ c.tenant_name }}</b> for ticket #{{ c.ticket_id }}</p>
+                                            {% else %}
+                                                <p class="text-muted">The technician has resolved this issue, but the tenant has not yet provided a rating or feedback.</p>
+                                                <button class="btn btn-outline-secondary btn-sm rounded-pill mt-2">Send Reminder to Tenant</button>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer border-0 pb-4 justify-content-center">
+                                            <button type="button" class="btn btn-dark px-5 py-2 fw-bold" data-bs-dismiss="modal" style="background: var(--trustfix-sage); border-radius: 12px;">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% else %}
+                            <div class="py-2 px-3 bg-light rounded-pill border d-inline-block opacity-50">
+                                <small class="text-muted italic"><i class="fa-solid fa-lock me-1"></i> Waiting for closure</small>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+        <div class="card-header bg-dark text-white p-4 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Full Ticket Report: #{{ t.ticket_id }}</h3>
+            <span class="badge rounded-pill px-4 py-2 fs-6 
+                {% if t.status == 'Pending' %}bg-danger
+                {% elif t.status == 'Resolved' %}bg-success
+                {% else %}bg-warning text-dark{% endif %}">
+                {{ t.status }}
+            </span>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-5 border-end">
+                    <p class="text-muted fw-bold small text-uppercase mb-3">Visual Evidence</p>
+                    {% if t.photo %}
+                        <img src="{{ url_for('static', filename='uploads/tickets/' + t.photo) }}" 
+                             class="img-fluid rounded shadow-sm mb-3" 
+                             style="width: 100%; max-height: 450px; object-fit: cover;"
+                             onerror="this.src='{{ url_for('static', filename='uploads/profiles/' + t.photo) }}';">
+                    {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center mb-3" style="height: 250px; border: 2px dashed #ccc;">
+                            <p class="text-muted">No photo uploaded</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="p-3 bg-light rounded">
+                        <label class="text-muted small fw-bold">TIMELINE</label>
+                        <p class="mb-1"><strong>Created:</strong> {{ t.created_at }}</p>
+                        {% if t.status == 'Completed' %}
+                            <p class="mb-0 text-success"><strong>Closed:</strong> Ticket marked completed</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-7 px-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-bold">TENANT NAME</label>
+                            <p class="fs-5 mb-0"><i class="fa-solid fa-user me-2 text-secondary"></i>{{ t.tenant_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-bold">FLAT / AREA</label>
+                            <p class="fs-5 mb-0"><i class="fa-solid fa-location-dot me-2 text-secondary"></i>{{ t.tenant_area }}</p>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="col-12">
+                            <label class="text-muted small fw-bold">ISSUE CATEGORY</label>
+                            <p class="fs-5 text-primary fw-bold mb-2">{{ t.issue_type }}</p>
+                        </div>
+                        <div class="col-12">
+                            <label class="text-muted small fw-bold">DETAILED DESCRIPTION</label>
+                            <div class="p-3 border rounded bg-white shadow-sm">
+                                {{ t.description }}
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="text-muted small fw-bold">ASSIGNED TECHNICIAN</label>
+                            <p class="fs-5">
+                                {% if t.tech_name %}
+                                    <i class="fa-solid fa-wrench me-2 text-success"></i>{{ t.tech_name }}
+                                {% else %}
+                                    <span class="text-muted"><i class="fa-solid fa-circle-exclamation me-2"></i>Not yet assigned</span>
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        {% if t.status == 'Completed' %}
+                        <div class="col-12">
+                            <div class="p-3 rounded" style="background-color: #f8f9fa; border-left: 5px solid #ffc107;">
+                                <label class="text-warning fw-bold small text-uppercase">Tenant Feedback & Rating</label>
+                                <div class="mt-2">
+                                    {% for i in range(t.rating|int) %}
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    {% endfor %}
+                                    <p class="mt-2 mb-0 italic">"{{ t.feedback }}"</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-5 d-flex gap-2">
+                        <a href="{{ url_for('all_complaints') }}" class="btn btn-outline-dark px-4 rounded-pill">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Back to List
+                        </a>
+                        {% if not t.tech_name %}
+                            <a href="{{ url_for('owner_dash') }}" class="btn btn-primary px-4 rounded-pill">Assign Now</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

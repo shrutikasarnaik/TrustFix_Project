@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{{ url_for('all_complaints') }}" class="text-decoration-none text-muted small fw-bold">
+            <i class="fa-solid fa-chevron-left me-1"></i> Back to Complaints
+        </a>
+        <div class="text-end">
+            <span class="badge rounded-pill px-3 py-2" style="background: var(--trustfix-olive); color: #fff;">
+                ID: {{ ticket.ticket_id }}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                {% if ticket.photo %}
+                    <img src="{{ url_for('static', filename='uploads/tickets/' + ticket.photo) }}" class="img-fluid w-100" style="max-height: 400px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-light d-flex flex-column align-items-center justify-content-center" style="height: 300px;">
+                        <i class="fa-solid fa-image text-muted fa-3x mb-2"></i>
+                        <p class="text-muted small">No photo provided</p>
+                    </div>
+                {% endif %}
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-uppercase small text-muted mb-3">Tenant's Description</h5>
+                    <p class="fs-5 text-dark" style="line-height: 1.6;">"{{ ticket.description }}"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1" style="color: var(--trustfix-sage);">{{ ticket.issue_type }}</h2>
+                        <span class="badge {% if ticket.urgency == 'High' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                            {{ ticket.urgency }} Priority
+                        </span>
+                    </div>
+                    <div class="text-end">
+                        <p class="small text-muted mb-0">Status</p>
+                        <h5 class="fw-bold text-primary">{{ ticket.status }}</h5>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="small text-muted d-block">Reported By</label>
+                        <p class="fw-bold mb-0">{{ ticket.tenant_name }}</p>
+                        <small class="text-muted"><i class="fa-solid fa-phone me-1"></i> {{ ticket.tenant_phone }}</small>
+                    </div>
+                    <div class="col-6">
+                        <label class="small text-muted d-block">Location/Area</label>
+                        <p class="fw-bold mb-0">{{ ticket.tenant_area if ticket.tenant_area else 'Not specified' }}</p>
+                    </div>
+                    <div class="col-6">
+                        <label class="small text-muted d-block">Reported Date</label>
+                        <p class="fw-bold mb-0">{{ ticket.created_at }}</p>
+                    </div>
+                    <div class="col-6">
+                        <label class="small text-muted d-block">Current Assigned Tech</label>
+                        <p class="fw-bold mb-0 text-success">{{ ticket.tech_name if ticket.tech_name else 'Needs Assignment' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4" style="background: #fdfdfd; border: 1px solid #eee !important;">
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-screwdriver-wrench me-2"></i> Owner Management Panel</h6>
+                <form action="#" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="small fw-bold text-muted mb-2">Assign to Specialist</label>
+                            <select class="form-select shadow-none rounded-pill" name="technician_id">
+                                <option value="">-- Select Technician --</option>
+                                </select>
+                        </div>
+                        <div class="col-md-5 d-flex align-items-end">
+                            <button type="submit" class="btn text-white w-100 rounded-pill fw-bold" style="background: var(--trustfix-sage); height: 38px;">
+                                Update Ticket
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

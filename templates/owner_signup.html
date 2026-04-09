@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustFix | Owner Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #fdfaf5; font-family: 'Segoe UI', sans-serif; }
+        .card { border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(141, 123, 104, 0.1); }
+        .section-title { color: #8d7b68; font-weight: 700; border-bottom: 2px solid #f5eee6; padding-bottom: 8px; margin-bottom: 20px; font-size: 1.1rem; }
+        .property-block { background: #fffcf8; border: 1px solid #eaddcf; border-radius: 15px; padding: 25px; margin-bottom: 20px; position: relative; }
+        label { font-size: 0.75rem; font-weight: 700; color: #a0948d; text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .form-control { border-radius: 10px; border: 1px solid #eaddcf; padding: 12px; font-size: 0.9rem; transition: 0.3s; }
+        .form-control:focus { border-color: #8d7b68; box-shadow: none; background-color: #fff; }
+        .btn-trustfix { background-color: #8d7b68; color: white; border: none; border-radius: 12px; padding: 15px; font-weight: 700; transition: 0.3s; width: 100%; }
+        .btn-trustfix:hover { background-color: #6f5f50; transform: translateY(-2px); color: white; }
+        .btn-outline-custom { border: 1px dashed #8d7b68; color: #8d7b68; border-radius: 12px; padding: 10px; font-weight: 600; width: 100%; transition: 0.3s; }
+        .btn-outline-custom:hover { background: #8d7b68; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="card mx-auto" style="max-width: 800px;">
+        <div class="card-body p-4 p-md-5">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <h2 class="text-center mb-4" style="color: #4a4036; font-weight: 800;">Owner Registration</h2>
+            
+            <form action="{{ url_for('register_owner') }}" method="POST">
+                
+                <h5 class="section-title">01. Account Details</h5>
+                <div class="row g-3 mb-5">
+                    <div class="col-md-6">
+                        <label>Full Name</label>
+                        <input type="text" name="owner_name" class="form-control" placeholder="Shrutika Sarnaik" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Username</label>
+                        <input type="text" name="username" class="form-control" placeholder="shrutika_01" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Email ID</label>
+                        <input type="email" name="email" class="form-control" placeholder="name@college.com" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone" class="form-control" placeholder="+91 00000 00000" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Password</label>
+                        <div class="input-group">
+                            <input type="password" name="password" id="password" class="form-control" style="border-right: none;" placeholder="••••••••" required>
+                            <span class="input-group-text" id="toggleEye" onclick="togglePassword()" style="background: #fff; cursor: pointer; border-left: none; border-color: #eaddcf;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#8d7b68" class="bi bi-eye" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="section-title">02. Property Portfolio</h5>
+                <div id="property-container">
+                    <div class="property-block shadow-sm">
+                        <div class="row g-3">
+                            <div class="col-md-12 mb-2">
+                                <label>Apartment / Society Name</label>
+                                <input type="text" name="society_name[]" class="form-control" placeholder="Ex: Sunshine Apartments" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label>City</label>
+                                <input type="text" name="city[]" class="form-control" placeholder="Pune" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label>State</label>
+                                <input type="text" name="state[]" class="form-control" placeholder="Maharashtra" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Pincode</label>
+                                <input type="text" name="pincode[]" class="form-control" placeholder="411001">
+                            </div>
+                            <div class="col-md-12">
+                                <label>Area / Landmark</label>
+                                <input type="text" name="landmark[]" class="form-control" placeholder="Ex: Near Main Road">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="button" class="btn btn-outline-custom mb-3" onclick="addProperty()">+ Add Another Tower/Building</button>
+                    <button type="submit" class="btn btn-trustfix">Complete Registration</button>
+                </div>
+                <div class="text-center mt-3">
+                    <small class="text-muted">Already have an account? <a href="{{ url_for('login') }}" style="color: #8d7b68; text-decoration: none; font-weight: 600;">Login here</a></small>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle Password Visibility
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.querySelector('#toggleEye svg');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        // Change icon to eye-slash
+        eyeIcon.innerHTML = '<path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"/><path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/><path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/>';
+    } else {
+        passwordInput.type = 'password';
+        // Change icon back to eye
+        eyeIcon.innerHTML = '<path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>';
+    }
+}
+
+// Dynamically Add Property Fields
+function addProperty() {
+    const container = document.getElementById('property-container');
+    const blocks = document.getElementsByClassName('property-block');
+    const firstBlock = blocks[0];
+    const clone = firstBlock.cloneNode(true);
+    
+    // Clear the input values in the cloned block
+    clone.querySelectorAll('input').forEach(input => {
+        input.value = '';
+    });
+
+    // Add a Remove Button
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 m-2';
+    removeBtn.style.borderRadius = '50%';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.onclick = function() { 
+        if(document.getElementsByClassName('property-block').length > 1) {
+            this.parentElement.remove(); 
+        }
+    };
+    clone.appendChild(removeBtn);
+
+    container.appendChild(clone);
+}
+</script>
+</body>
+</html>

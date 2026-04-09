@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustFix | {% block title %}{% endblock %}</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --sage-green: #6b705c;
+            --nude-beige: #fdfcf0;
+            --sidebar-bg: #1a1d20;
+            --text-muted: #a0a0a0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            color: white;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--sage-green);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .nav-group-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            margin: 20px 0 10px 10px;
+            font-weight: 700;
+        }
+
+        .nav-link {
+            color: #d1d1d1;
+            padding: 12px 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+        }
+
+        .nav-link i {
+            width: 25px;
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+
+        .nav-link:hover {
+            background: rgba(107, 112, 92, 0.1);
+            color: var(--sage-green);
+        }
+
+        .nav-link.active {
+            background: var(--sage-green);
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(107, 112, 92, 0.3);
+        }
+
+        .nav-link.text-danger:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        body.no-sidebar .sidebar { display: none; }
+        body.no-sidebar .main-content { margin-left: 0; width: 100%; padding: 0; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #6b705c; border-radius: 10px; }
+    </style>
+</head>
+<body class="{% if request.endpoint == 'landing' %}no-sidebar{% endif %}">
+
+    <div class="sidebar">
+        <a href="/" class="brand-logo">
+            <i class="fa-solid fa-screwdriver-wrench me-2"></i> <span>TRUSTFIX</span>
+        </a>
+        
+        <div class="nav-group-label">Main Menu</div>
+        
+        {% set user_role = session.get('role')|lower %}
+
+        {# --- OWNER NAVIGATION --- #}
+        {% if user_role == 'owner' %}
+            <a href="{{ url_for('owner_dash') }}" class="nav-link {% if request.endpoint == 'owner_dash' %}active{% endif %}">
+                <i class="fa-solid fa-chart-line"></i> <span>Admin Home</span>
+            </a>
+            <a href="{{ url_for('create_user') }}" class="nav-link {% if request.endpoint == 'create_user' %}active{% endif %}">
+                <i class="fa-solid fa-user-plus"></i> <span>Add Tenant/Tech</span>
+            </a>
+            <a href="{{ url_for('all_complaints') }}" class="nav-link {% if request.endpoint == 'all_complaints' %}active{% endif %}">
+                <i class="fa-solid fa-clipboard-list"></i> <span>All Complaints</span>
+            </a>
+            <a href="{{ url_for('manage_users') }}" class="nav-link {% if request.endpoint == 'manage_users' %}active{% endif %}">
+                <i class="fa-solid fa-users"></i> <span>User Directory</span>
+            </a>
+
+        {# --- TECHNICIAN NAVIGATION --- #}
+        {% elif user_role == 'technician' %}
+            <a href="{{ url_for('tech_dashboard') }}" class="nav-link {% if request.endpoint == 'tech_dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-list-check"></i> <span>Active Jobs</span>
+            </a>
+            <a href="{{ url_for('work_history') }}" class="nav-link {% if request.endpoint == 'work_history' %}active{% endif %}">
+                <i class="fa-solid fa-clock-rotate-left"></i> <span>Work History</span>
+            </a>
+
+       {# --- TENANT NAVIGATION --- #}
+        {% elif user_role == 'tenant' %}
+            <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-house"></i> <span>Home</span>
+            </a>
+            <a href="{{ url_for('raise_ticket') }}" class="nav-link {% if request.endpoint == 'raise_ticket' %}active{% endif %}">
+                <i class="fa-solid fa-plus"></i> <span>Raise Ticket</span>
+            </a>
+            <a href="{{ url_for('tenant_history') }}" class="nav-link {% if request.endpoint == 'tenant_history' %}active{% endif %}">
+                <i class="fa-solid fa-clock-rotate-left"></i> <span>Service History</span>
+            </a>
+        {% endif %}
+        
+        {# --- DYNAMIC PROFILE OPTION (HIDDEN FOR OWNER) --- #}
+        {% if user_role != 'owner' %}
+            <div class="nav-group-label">Account & Profile</div>
+            <a href="{{ url_for('my_profile') }}" class="nav-link {% if request.endpoint == 'my_profile' %}active{% endif %}">
+                <i class="fa-solid fa-user-gear"></i> <span>My Profile</span>
+            </a>
+        {% endif %}
+
+        <div class="nav-group-label">Communication</div>
+        <a href="{{ url_for('helpbot') }}" class="nav-link {% if request.endpoint == 'helpbot' %}active{% endif %}">
+            <i class="fa-solid fa-robot"></i> <span>HelpBot Chat</span>
+        </a>
+        <a href="{{ url_for('inbox') }}" class="nav-link {% if request.endpoint == 'inbox' %}active{% endif %}">
+            <i class="fa-solid fa-comments"></i> <span>Messages</span>
+        </a>
+        
+        <div class="mt-auto pt-4 border-top border-secondary">
+            <a href="{{ url_for('logout') }}" class="nav-link text-danger">
+                <i class="fa-solid fa-power-off"></i> <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0" role="alert" style="border-radius: 12px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

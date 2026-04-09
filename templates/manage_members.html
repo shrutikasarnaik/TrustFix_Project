@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Member Directory | TrustFix{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #6b705c;">Member Directory</h2>
+        <a href="{{ url_for('create_user') }}" class="btn btn-dark" style="background:#6b705c; border:none; border-radius: 8px;">+ Add Member</a>
+    </div>
+
+    <ul class="nav nav-pills mb-4" id="memberTabs" style="background: #f1f1f1; padding: 5px; border-radius: 12px; display: inline-flex;">
+        <li class="nav-item">
+            <button class="nav-link active px-4" data-bs-toggle="tab" data-bs-target="#tenants" style="border-radius: 10px;">Tenants</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link px-4" data-bs-toggle="tab" data-bs-target="#techs" style="border-radius: 10px;">Technicians</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="tenants">
+            <div class="glass-card p-0 shadow-sm overflow-hidden bg-white" style="border-radius: 15px;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="small text-muted">
+                            <th>PROFILE</th>
+                            <th>NAME</th>
+                            <th>FLAT/AREA</th>
+                            <th>RENT STATUS</th>
+                            <th class="text-end">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in members if m.role|lower == 'tenant' %}
+                        <tr>
+                            <td style="width: 80px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 45px; height: 45px;">
+                                    <i class="fa-solid fa-user-tie text-muted"></i>
+                                </div>
+                            </td>
+                            <td><strong>{{ m.name }}</strong></td>
+                            <td>{{ m.area or 'Not Assigned' }}</td>
+                            <td>
+                                <span class="badge rounded-pill {% if m.rent_paid %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} px-3">
+                                    {{ 'Paid' if m.rent_paid else 'Pending' }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-3">
+                                <a href="{{ url_for('view_user_profile', user_id=m.id) }}" class="btn btn-sm btn-outline-dark">View Profile</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="techs">
+            <div class="glass-card p-0 shadow-sm overflow-hidden bg-white" style="border-radius: 15px;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="small text-muted">
+                            <th>PROFILE</th>
+                            <th>NAME</th>
+                            <th>SPECIALTY</th>
+                            <th>OVERALL FEEDBACK</th>
+                            <th class="text-end">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in members if m.role|lower == 'technician' %}
+                        <tr>
+                            <td style="width: 80px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 45px; height: 45px;">
+                                    <i class="fa-solid fa-screwdriver-wrench text-muted"></i>
+                                </div>
+                            </td>
+                            <td><strong>{{ m.name }}</strong></td>
+                            <td><span class="badge bg-info-subtle text-info border border-info">{{ m.work_type or 'General' }}</span></td>
+                            <td>
+                                <div class="text-warning small">
+                                    <i class="fa-solid fa-star"></i> 4.7 <span class="text-muted">(Good)</span>
+                                </div>
+                            </td>
+                            <td class="text-end pe-3">
+                                <a href="{{ url_for('view_user_profile', user_id=m.id) }}" class="btn btn-sm btn-outline-dark">View Profile</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

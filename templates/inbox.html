@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="chat-wrapper">
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <h5>Messages</h5>
+        </div>
+        <div class="search-container">
+            <input type="text" id="contactSearch" class="form-control modern-search" 
+                   placeholder="Search contacts..." onkeyup="filterContacts()">
+        </div>
+        
+        <div class="contact-list" id="contactList">
+            {% for contact in contacts %}
+            <a href="{{ url_for('inbox', receiver_id=contact.id, receiver_type=contact.type) }}" 
+               class="d-flex align-items-center p-3 text-decoration-none contact-item {% if active_user and active_user.id == contact.id and receiver_type == contact.type %}active-contact{% endif %}"
+               data-name="{{ contact.name }}" data-role="{{ contact.role }}" data-area="{{ contact.area }}">
+                
+                <div class="avatar-modern shadow-sm">
+                    {{ contact.name[0] | upper }}
+                </div>
+                
+                <div class="ms-3 overflow-hidden">
+                    <div class="fw-bold text-truncate" style="color: #333;">{{ contact.name }}</div>
+                    <div class="small text-muted text-truncate">{{ contact.role }} • {{ contact.area }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="chat-main">
+        {% if active_user %}
+            <div class="chat-header-top">
+                <div class="d-flex align-items-center">
+                    <div class="avatar-modern me-3" style="width: 40px; height: 40px;">{{ active_user.name[0] | upper }}</div>
+                    <div>
+                        <div class="fw-bold" style="font-size: 1.1rem;">{{ active_user.name }}</div>
+                        <small class="text-success">● {{ active_user.role }}</small>
+                    </div>
+                </div>
+            </div>
+<div class="flex-grow-1 overflow-auto p-3" id="message-container">
+    {% for msg in messages %}
+        {% set is_me = (msg.sender_id == session['user_id'] and msg.sender_type == ('Owner' if session['role'] == 'Owner' else 'User')) %}
+        
+        <div class="d-flex mb-3 {% if is_me %}justify-content-end{% else %}justify-content-start{% endif %}">
+            <div class="msg-bubble {% if is_me %}msg-sent{% else %}msg-received{% endif %} position-relative">
+                
+                {% if is_me %}
+                <button class="delete-icon-btn" onclick="confirmDelete('{{ msg.id }}')">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                {% endif %}
+
+                {% if msg.image_file %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + msg.image_file) }}" 
+                         class="chat-img-msg mb-2" 
+                         style="max-width: 130px; border-radius: 10px; cursor: pointer; display: block;" 
+                         onclick="window.open(this.src)">
+                {% endif %}
+
+                {% if msg.message and ("google.com/maps" in msg.message or "maps.google.com" in msg.message) %}
+                    <div class="location-container">
+                        <iframe 
+                            width="100%" 
+                            height="120" 
+                            style="border-radius:10px; border:0; margin-bottom:8px;"
+                            loading="lazy"
+                            src="https://www.google.com/maps?q={{ msg.message.split('/')[-1] }}&output=embed">
+                        </iframe>
+
+                        <a href="{{ msg.message }}" target="_blank" class="location-shared-card">
+                            <div class="loc-icon-wrapper">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div class="loc-details">
+                                <span class="loc-title">📍 Location Shared</span>
+                                <span class="loc-link-text">View on Google Maps</span>
+                            </div>
+                        </a>
+                    </div>
+                
+                {% else %}
+                    <div class="msg-text">{{ msg.message }}</div>
+                {% endif %}
+
+                <div class="d-flex align-items-center justify-content-end mt-1" style="font-size: 0.65rem; opacity: 0.7;">
+                    <span>{{ msg.timestamp }}</span>
+                    {% if is_me %}
+                        <span class="ms-1">
+                            <i class="fa-solid {% if msg.is_read %}fa-check-double text-info{% else %}fa-check{% endif %}"></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div> </div> {% endfor %}
+</div>
+            <div class="input-footer">
+                <div id="attachment-preview">
+                    <span id="preview-filename"></span>
+                    <i class="fa-solid fa-xmark cursor-pointer" onclick="clearAttachments()"></i>
+                </div>
+
+                <form action="{{ url_for('send_message') }}" method="POST" enctype="multipart/form-data" id="msgForm">
+                    <input type="hidden" name="receiver_id" value="{{ active_user.id }}">
+                    <input type="hidden" name="receiver_type" value="{{ receiver_type }}">
+                    <input type="hidden" name="location_data" id="locationData">
+                    
+                    <div class="modern-input-group">
+                        <label for="imageUpload" class="chat-action-btn mb-0">
+                            <i class="fa-regular fa-image"></i>
+                        </label>
+                        <input type="file" id="imageUpload" name="image" class="d-none" onchange="handleFile(this)">
+
+                        <i class="fa-solid fa-location-dot chat-action-btn" onclick="shareLocation()"></i>
+
+                        <input type="text" name="message" id="messageInput" class="form-control" placeholder="Write a message..." autocomplete="off">
+                        
+                        <button type="submit" class="btn-send-pill">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        {% else %}
+            <div class="m-auto text-center text-muted d-flex flex-column justify-content-center align-items-center h-100">
+                <i class="fa-regular fa-comments fa-4x mb-3" style="color: #bc9c82; opacity: 0.3;"></i>
+                <h4 class="fw-bold">Select a conversation</h4>
+                <p>Choose a tenant or technician to start messaging.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // 1. Scroll to bottom on load
+    const msgContainer = document.getElementById('message-container');
+    if (msgContainer) {
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+
+    // 2. Handle Image Selection Preview
+    function handleFile(input) {
+        const preview = document.getElementById('attachment-preview');
+        const filename = document.getElementById('preview-filename');
+        if (input.files && input.files[0]) {
+            preview.style.display = 'flex';
+            filename.innerText = "Selected Photo: " + input.files[0].name;
+        }
+    }
+
+    // 3. Share Geolocation
+    function shareLocation() {
+        if (navigator.geolocation) {
+            Swal.fire({
+                title: 'Share Location?',
+                text: "Send your current coordinates to this chat.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#6b705c',
+                confirmButtonText: 'Yes, share'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        // Correct Google Maps URL format
+                        const mapLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                        
+                        document.getElementById('locationData').value = mapLink;
+                        const preview = document.getElementById('attachment-preview');
+                        const filename = document.getElementById('preview-filename');
+                        preview.style.display = 'flex';
+                        filename.innerText = "Location Attached 📍";
+                    });
+                }
+            });
+        } else {
+            Swal.fire('Error', 'Geolocation is not supported by your browser.', 'error');
+        }
+    }
+
+    function clearAttachments() {
+        document.getElementById('imageUpload').value = "";
+        document.getElementById('locationData').value = "";
+        document.getElementById('attachment-preview').style.display = 'none';
+    }
+
+    // 4. Delete Message Confirmation
+    function confirmDelete(msgId) {
+        Swal.fire({
+            title: 'Delete Message?',
+            text: "This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#6b705c',
+            cancelButtonColor: '#ff7675',
+            confirmButtonText: 'Delete',
+            background: '#fdfaf5'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/delete_message/${msgId}`;
+            }
+        });
+    }
+
+    // 5. Sidebar Filter
+    function filterContacts() {
+        let input = document.getElementById('contactSearch').value.toLowerCase();
+        let items = document.getElementsByClassName('contact-item');
+        for (let item of items) {
+            let name = item.getAttribute('data-name').toLowerCase();
+            let role = item.getAttribute('data-role').toLowerCase();
+            let area = item.getAttribute('data-area').toLowerCase();
+            item.style.display = (name.includes(input) || role.includes(input) || area.includes(input)) ? "flex" : "none";
+        }
+    }
+</script>
+
+{% endblock %}

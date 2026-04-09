@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}My Profile | TrustFix{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <form method="POST" enctype="multipart/form-data">
+        <div class="row g-4">
+            
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 text-center p-4" style="border-radius: 20px; background: white;">
+                    <div class="mb-3">
+                        {% if user_info.profile_pic %}
+                            <img src="{{ url_for('static', filename='uploads/' + user_info.profile_pic) }}" 
+                                 class="rounded-circle border shadow-sm" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center border" style="width: 150px; height: 150px;">
+                                <i class="fa-solid fa-user fa-4x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <label class="mini-label">Change Photo</label>
+                    <input type="file" name="profile_pic" class="form-control form-control-sm mb-3">
+                    <h4 class="fw-bold mb-1">{{ user_info.name }}</h4>
+                    <span class="badge bg-sage text-uppercase px-3">{{ user_info.role }}</span>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 p-4 p-md-5" style="border-radius: 24px; background: white;">
+                    
+                    {% if user_info.role|lower == 'tenant' %}
+                    <h5 class="section-title mb-4"><i class="fa-solid fa-map-location-dot me-2"></i> Resident Address</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <label class="mini-label">Flat No.</label>
+                            <input type="text" name="flat_no" class="form-box" value="{{ user_info.flat_no or '' }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="mini-label">Area</label>
+                            <input type="text" name="area" class="form-box" value="{{ user_info.area or '' }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="mini-label">City</label>
+                            <input type="text" name="city" class="form-box" value="{{ user_info.city or '' }}">
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <h5 class="section-title mb-4"><i class="fa-solid fa-user-pen me-2"></i> Contact & Personal</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="mini-label">Email</label>
+                            <input type="email" name="email" class="form-box" value="{{ user_info.email or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="mini-label">Phone</label>
+                            <input type="text" name="phone" class="form-box" value="{{ user_info.phone or '' }}">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="mini-label">Aadhar Number</label>
+                            <input type="text" name="aadhar" class="form-box" value="{{ user_info.aadhar_no or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-save px-5 py-2 fw-bold">UPDATE PROFILE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    :root { --sage: #8d7b68; --nude: #f5eee6; }
+    .section-title { font-size: 0.85rem; font-weight: 800; border-bottom: 2px solid var(--nude); padding-bottom: 8px; color: var(--sage); text-transform: uppercase; }
+    .mini-label { font-size: 0.7rem; text-transform: uppercase; color: #a0948d; font-weight: 700; margin-bottom: 4px; display: block; }
+    .form-box { border-radius: 10px; border: 1px solid #eaddcf; padding: 10px; font-size: 0.9rem; width: 100%; background: #fff; outline: none; }
+    .btn-save { background: var(--sage); color: white; border-radius: 10px; border: none; transition: 0.3s; }
+    .bg-sage { background-color: var(--sage); color: white; }
+</style>
+{% endblock %}

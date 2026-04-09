@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}User Profile | TrustFix{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-lg overflow-hidden" style="border-radius: 25px;">
+                
+                <div class="p-5 text-white d-flex align-items-center justify-content-between" 
+                     style="background: {% if user['role']|lower == 'tenant' %}linear-gradient(135deg, #6b705c 0%, #a5a58d 100%){% else %}linear-gradient(135deg, #4a4e69 0%, #9a8c98 100%){% endif %};">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 85px; height: 85px;">
+                            <i class="fa-solid {% if user['role']|lower == 'tenant' %}fa-house-user text-success{% else %}fa-wrench text-primary{% endif %} fa-2x"></i>
+                        </div>
+                        <div class="ms-4">
+                            <h3 class="mb-1 fw-bold">{{ user['name'] }}</h3>
+                            <span class="badge rounded-pill bg-white text-dark px-3 py-2 text-uppercase ls-1" style="font-size: 0.75rem; letter-spacing: 1px;">
+                                {{ user['role'] }}
+                            </span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('manage_users') }}" class="btn btn-sm btn-outline-light px-3 py-2" style="border-radius: 10px;">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Back to Directory
+                    </a>
+                </div>
+
+                <div class="card-body p-5 bg-white">
+                    <div class="row g-5">
+                        
+                        <div class="col-md-6 border-end">
+                            <h6 class="text-uppercase text-muted fw-bold mb-4 small ls-1 border-bottom pb-2">
+                                <i class="fa-solid fa-id-card me-2"></i>Account Details
+                            </h6>
+                            
+                            <div class="mb-4">
+                                <label class="small text-muted d-block fw-bold mb-1">FULL NAME</label>
+                                <p class="form-control-plaintext border-bottom py-1 fw-medium text-dark">{{ user['name'] }}</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="small text-muted d-block fw-bold mb-1">EMAIL ADDRESS</label>
+                                <p class="form-control-plaintext border-bottom py-1 text-dark">{{ user['email'] }}</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="small text-muted d-block fw-bold mb-1">PHONE NUMBER</label>
+                                <p class="form-control-plaintext border-bottom py-1 text-dark">{{ user['phone'] or 'Not Provided' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted fw-bold mb-4 small ls-1 border-bottom pb-2">
+                                <i class="fa-solid fa-circle-info me-2"></i>Resident & Service Info
+                            </h6>
+
+                            {% if user['role']|lower == 'tenant' %}
+                                <div class="mb-4">
+                                    <label class="small text-muted d-block fw-bold mb-1 text-success">ALLOCATED AREA / FLAT NO.</label>
+                                    <p class="form-control-plaintext border-bottom py-1 fw-bold text-dark">{{ user['area'] or 'N/A' }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="small text-muted d-block fw-bold mb-1">OFFICIAL ADDRESS</label>
+                                    <p class="form-control-plaintext border-bottom py-1 small text-muted" style="line-height: 1.6;">
+                                        {{ user['address'] or 'No detailed address record found.' }}
+                                    </p>
+                                </div>
+                            {% else %}
+                                <div class="mb-4">
+                                    <label class="small text-muted d-block fw-bold mb-1 text-primary">PRIMARY SPECIALTY</label>
+                                    <p class="form-control-plaintext border-bottom py-1 fw-bold text-dark">{{ user['specialty'] or 'General Maintenance' }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="small text-muted d-block fw-bold mb-1">ASSIGNED SERVICE ZONE</label>
+                                    <p class="form-control-plaintext border-bottom py-1 text-dark">{{ user['area'] or 'All Areas' }}</p>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mb-4">
+                                <label class="small text-muted d-block fw-bold mb-1">MEMBER SINCE</label>
+                                <p class="form-control-plaintext border-bottom py-1 text-muted small">{{ user['created_at'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if history %}
+                    <div class="mt-5">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 small border-bottom pb-2">
+                            <i class="fa-solid fa-clock-rotate-left me-2"></i>Recent Activity
+                        </h6>
+                        <ul class="list-group list-group-flush shadow-sm rounded-3">
+                            {% for log in history %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <span class="small fw-medium">{{ log.description }}</span>
+                                <span class="badge bg-light text-muted border fw-normal">{{ log.date }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-5 pt-4 text-center border-top">
+                        <a href="{{ url_for('inbox', receiver_id=user['id']) }}" 
+                           class="btn btn-dark px-5 py-3 shadow-sm" 
+                           style="background:#6b705c; border:none; border-radius:15px; font-weight: 600;">
+                            <i class="fa-solid fa-paper-plane me-2"></i>Message {{ user['name'].split(' ')[0] }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ls-1 { letter-spacing: 1px; }
+    .form-control-plaintext { 
+        padding-left: 0; 
+        font-size: 1.05rem;
+    }
+    .card {
+        transition: transform 0.3s ease;
+    }
+    label {
+        letter-spacing: 0.5px;
+    }
+    .badge {
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
